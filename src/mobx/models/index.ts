@@ -14,12 +14,16 @@ export const GoalStore = types.model("GoalStore", {
   .views((self) => {
     return {
 
+      get dueGoals() {
+        return self.goals.filter((g) => new Date(g.endDate) >= new Date());
+      },
+
       findByTitle(title: string) {
-        return self.goals.filter((g) => g.title.toLowerCase().includes(title.toLowerCase()));
+        return self.goals.filter((g) => g.title.toLowerCase().startsWith(title.toLowerCase()));
       },
 
       findByDescription(description: string) {
-        return self.goals.filter((g) => g.description.toLowerCase().includes(description.toLowerCase()));
+        return self.goals.filter((g) => g.description.toLowerCase().startsWith(description.toLowerCase()));
       }
     }
   })
@@ -27,10 +31,22 @@ export const GoalStore = types.model("GoalStore", {
   .actions((self) => {
     return {
       addGoal(title: string, description: string, startDate: Date, endDate: Date) {
-        self.goals.push({ title, description, startDate, endDate });
+        const item = { title, description, startDate, endDate };
+        self.goals.push(item);
+        localStorage.setItem('goals', JSON.stringify(self.goals));
+      },
+
+      initGoals() {
+        const data = localStorage.getItem('goals');
+        const goals = data ? JSON.parse(data) : [];
+        self.goals = goals;
       }
     }
   });
 
 
-export const goalstore = GoalStore.create();
+const goalstore = GoalStore.create();
+
+goalstore.initGoals();
+
+export default goalstore;
