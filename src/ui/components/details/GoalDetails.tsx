@@ -4,6 +4,7 @@ import { getDuration } from "../../../libs/time/utils";
 import { TrashIcon, CheckIcon, XMarkIcon } from "@heroicons/react/16/solid";
 import { useState } from "react";
 import goalstore from "../../../mobx/models";
+import { observer } from "mobx-react-lite";
 
 interface GoalDetailsProps {
   onBackClick: () => void;
@@ -11,17 +12,17 @@ interface GoalDetailsProps {
 
 }
 
-type ActionType = "delete" | "edit";
+type ActionType = "delete" | "edit" | "none";
 
-export default function GoalDetails({ goal, onBackClick }: GoalDetailsProps) {
+const GoalDetails = observer(({ goal, onBackClick }: GoalDetailsProps) => {
   const duration = getDuration(goal?.startDate, goal?.endDate);
   const currentDays = getDuration(goal?.startDate, new Date().toISOString());
 
-  const [actionConfirm, setActionConfirm] = useState<ActionType>("");
+  const [actionConfirm, setActionConfirm] = useState<ActionType>("none");
 
   const handleDelete = () => {
     onBackClick();
-    setActionConfirm("");
+    setActionConfirm("none");
     goalstore.deleteGoal(goal.title);
   }
 
@@ -30,7 +31,7 @@ export default function GoalDetails({ goal, onBackClick }: GoalDetailsProps) {
   }
 
   const handleCancelClick = () => {
-    setActionConfirm("");
+    setActionConfirm("none");
   }
 
   const handleActionConfirm = () => {
@@ -86,3 +87,5 @@ export default function GoalDetails({ goal, onBackClick }: GoalDetailsProps) {
     </div >
   )
 }
+)
+export default GoalDetails;

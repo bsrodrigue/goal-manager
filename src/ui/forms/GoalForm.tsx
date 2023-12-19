@@ -1,3 +1,4 @@
+import moment from "moment";
 import BaseInput from "../components/input/BaseInput";
 import BaseTextArea from "../components/input/BaseTextArea";
 
@@ -13,30 +14,33 @@ interface GoalFormProps {
   onEndDateChange: (value: string) => void;
 
   onSubmit: () => void;
+
+  isEditMode?: boolean;
 }
 
 export default function GoalForm({
   title, description, startDate,
   endDate, onTitleChange, onDescriptionChange,
-  onStartDateChange, onEndDateChange, onSubmit
+  onStartDateChange, onEndDateChange, onSubmit,
+  isEditMode,
 }: GoalFormProps) {
+
 
   return (
 
     <div>
-      <div className=" divider"></div>
       <BaseInput value={title} onChange={onTitleChange} label="Goal Title" placeholder="What goal do you want to achieve?" />
       <BaseTextArea value={description} onChange={onDescriptionChange} label="Goal Description" placeholder="Describre your goal..." />
 
       <div className="flex justify-between">
         <div>
           <small className="label font-bold">Start Date</small>
-          <input value={startDate} onChange={(e) => onStartDateChange(e.target.value)} className="input input-bordered" type="date" />
+          <input value={moment(startDate).format("Y-MM-DD")} onChange={(e) => onStartDateChange(e.target.value)} className="input input-bordered" type="date" />
         </div>
 
         <div>
           <small className="label font-bold">End Date</small>
-          <input value={endDate} onChange={(e) => onEndDateChange(e.target.value)} className="input input-bordered" type="date" />
+          <input value={moment(endDate).format("Y-MM-DD")} onChange={(e) => onEndDateChange(e.target.value)} className="input input-bordered" type="date" />
         </div>
       </div>
 
@@ -44,7 +48,9 @@ export default function GoalForm({
       <button
         onClick={onSubmit}
         className="btn bg-gm-600 text-white w-full mt-5">
-        Create
+        {
+          isEditMode ? "Edit" : "Create"
+        }
       </button>
     </div>
   )

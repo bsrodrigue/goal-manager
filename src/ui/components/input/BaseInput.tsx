@@ -13,7 +13,7 @@ export default function BaseInput({ value, label, placeholder, onChange }: BaseI
       <input
         value={value}
         type="text"
-        className="input input-bordered w-full"
+        className="input input-bordered w-full focus:outline-none"
         onChange={(e) => onChange?.(e.target.value)}
         placeholder={placeholder} />
     </div>

@@ -11,6 +11,7 @@ export default function GoalList({ goals, onClickItem }: GoalListProps) {
       {
         goals.map((goal) => (
           <li
+            key={goal.title}
             onClick={() => {
               onClickItem(goal);
             }}
