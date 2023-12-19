@@ -40,9 +40,15 @@ const App = observer(() => {
   }
 
   return (
-    <main className="bg-gm-500 h-screen flex justify-center items-center">
+    <main className="bg-gm-500 h-screen flex flex-col gap-5 justify-center items-center">
 
-      <div className="bg-white flex flex-col justify-between h-full md:max-h-[700px] w-full md:max-w-xl p-5 rounded drop-shadow-md">
+      <div role="tablist" className="tabs tabs-bordered">
+        <a role="tab" className="tab text-white">Dashboard</a>
+        <a role="tab" className="tab tab-active [--tab-border-color:orange] text-white">Partners</a>
+        <a role="tab" className="tab text-white">Account</a>
+      </div>
+
+      <div className="bg-white flex flex-col justify-between h-full md:max-h-[75vh] w-full md:max-w-xl p-5 rounded drop-shadow-md">
         <div>
           <div className="flex justify-center mb-5">
             <p className="font-bold">Goal Manager</p>

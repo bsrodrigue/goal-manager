@@ -15,7 +15,8 @@ export default function GoalList({ goals, onClickItem }: GoalListProps) {
               onClickItem(goal);
             }}
             className="ml-5 list-disc hover:cursor-pointer">
-            {goal.title}</li>
+            {goal.title}
+          </li>
         ))
       }
     </ul>

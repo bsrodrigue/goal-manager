@@ -36,6 +36,12 @@ export const GoalStore = types.model("GoalStore", {
         localStorage.setItem('goals', JSON.stringify(self.goals));
       },
 
+      deleteGoal(title: string) {
+        const filtered = self.goals.filter((g) => g.title !== title);
+        self.goals.replace(filtered);
+        localStorage.setItem('goals', JSON.stringify(self.goals));
+      },
+
       initGoals() {
         const data = localStorage.getItem('goals');
         const goals = data ? JSON.parse(data) : [];
