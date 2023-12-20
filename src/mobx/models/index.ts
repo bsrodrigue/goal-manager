@@ -1,6 +1,17 @@
-import { onSnapshot, types } from "mobx-state-tree";
+import { flow, onSnapshot, types } from "mobx-state-tree";
 import { IGoal } from "../../types";
 import { Toaster } from "../../libs/notifications/toast";
+import API from "../../api/endpoints";
+
+export const SessionStore = types.model("SessionStore", {
+  token: types.string,
+  user: types.model("User", {
+    id: types.identifier,
+    username: types.string,
+    email: types.string,
+    score: types.number,
+  })
+});
 
 export const Goal = types.model("Goal", {
   id: types.identifier,
@@ -27,6 +38,7 @@ export const Goal = types.model("Goal", {
 export const GoalStore = types.model("GoalStore", {
   goals: types.array(Goal),
   selectedGoal: types.safeReference(Goal),
+  state: types.enumeration("State", ["pending", "done", "error"]),
 })
 
   .views((self) => {
@@ -47,6 +59,15 @@ export const GoalStore = types.model("GoalStore", {
       addGoal(title: string, description: string, startDate: Date, endDate: Date) {
         const item = { title, description, startDate, endDate };
         const id = crypto.randomUUID();
+
+        // Try to create on server with uuid
+
+        try {
+          API.goals.create(item);
+        } catch (error) {
+          Toaster.error("Error while saving goal on server, local storage fallback");
+        }
+
         self.goals.push({ id, ...item });
         Toaster.success("Goal created with success");
       },
@@ -62,17 +83,53 @@ export const GoalStore = types.model("GoalStore", {
         self.selectedGoal = goal;
       },
 
-      initGoals() {
+      initGoals: flow(function*() {
+        self.state = "pending";
+
+        try {
+          const serverGoals = yield API.goals.getAll();
+          // Sync (compare and update)
+          console.log(serverGoals);
+        } catch (error) {
+          console.error(error);
+          self.state = "error";
+        }
+
+        self.state = "done";
+
         const data = localStorage.getItem('goals');
         const goals = data ? JSON.parse(data) : [];
         self.goals = goals;
-      },
+      }),
+
+
+      sync: flow(function*() {
+        self.state = "pending";
+
+        try {
+          const serverGoals = yield API.goals.getAll();
+          // Sync (compare and update)
+          console.log(serverGoals);
+        } catch (error) {
+          console.error(error);
+          self.state = "error";
+        }
+
+        self.state = "done";
+
+      }),
     }
   });
 
-const goalstore = GoalStore.create();
+const goalstore = GoalStore.create({ state: "done" });
+
+export const sessionStore = SessionStore.create();
 
 goalstore.initGoals();
+
+setInterval(() => {
+  goalstore.sync();
+}, 15 * 60 * 1000);
 
 onSnapshot(goalstore, (snapshot) => {
   console.info(snapshot);
