@@ -1,6 +1,7 @@
 import { createGoal, getAllGoals } from "./goals";
-import { createPartnershipRequest } from "./parnershipRequests"
+import { createPartnershipRequest, getAllMyPartnershipRequests, getAllPartnershipRequestsToMe } from "./parnershipRequests"
 import { register, login } from "./auth";
+import { searchUsers } from "./users";
 
 const API = {
   auth: {
@@ -8,8 +9,16 @@ const API = {
     login,
   },
 
+  users: {
+    search: {
+      username: searchUsers
+    }
+  },
+
   partnershipRequests: {
-    create: createPartnershipRequest
+    create: createPartnershipRequest,
+    getAllMy: getAllMyPartnershipRequests,
+    getAllToMe: getAllPartnershipRequestsToMe,
   },
 
   goals: {

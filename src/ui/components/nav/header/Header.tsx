@@ -1,6 +1,9 @@
+import { observer } from "mobx-react-lite";
 import { Link } from "react-router-dom";
+import { sessionStore } from "../../../../mobx/models";
 
-export default function Header() {
+const Header = observer(() => {
+  const user = sessionStore.user;
 
   return (
     <div className="navbar bg-base-100">
@@ -11,10 +14,12 @@ export default function Header() {
         <ul className="menu menu-horizontal px-1">
           <li>
             <details>
-              <summary>Account</summary>
-              <ul className="p-2 bg-base-100 rounded-t-none">
-                <li><Link to="/auth">Login</Link></li>
-                <li><Link to="/auth">Register</Link></li>
+              <summary>{
+                user?.username || "Account"
+              }</summary>
+              <ul className="p-2 bg-base-100 rounded-t-none z-10">
+                <li><Link to="/auth">Authenticate</Link></li>
+                <li><Link to="/requests">Requests</Link></li>
               </ul>
             </details>
           </li>
@@ -22,4 +27,6 @@ export default function Header() {
       </div>
     </div>
   );
-}
+})
+
+export default Header;

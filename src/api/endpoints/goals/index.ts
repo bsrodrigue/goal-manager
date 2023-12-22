@@ -14,7 +14,7 @@ export async function createGoal(input: CreateGoalInput) {
     ...input
   });
 
-  return result.data;
+  return result.data.data;
 }
 
 export async function getAllGoals() {

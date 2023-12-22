@@ -1,24 +1,69 @@
 import moment from "moment";
-import { IGoal } from "../../../types";
 import { getDuration } from "../../../libs/time/utils";
-import { TrashIcon, CheckIcon, XMarkIcon } from "@heroicons/react/16/solid";
+import { TrashIcon, CheckIcon, XMarkIcon, UserGroupIcon } from "@heroicons/react/16/solid";
 import { useState } from "react";
-import goalstore from "../../../mobx/models";
+import goalstore, { partnershipRequestStore } from "../../../mobx/models";
 import { observer } from "mobx-react-lite";
+import API from "../../../api/endpoints";
+import { debounce } from "../../../libs/utils";
+import BaseInput from "../input/BaseInput";
+import { IUser } from "../../../types";
+import { Toaster } from "../../../libs/notifications/toast";
 
 interface GoalDetailsProps {
   onBackClick: () => void;
-  goal: IGoal;
-
 }
 
 type ActionType = "delete" | "edit" | "none";
 
-const GoalDetails = observer(({ goal, onBackClick }: GoalDetailsProps) => {
+
+
+const GoalDetails = observer(({ onBackClick }: GoalDetailsProps) => {
+  if (!goalstore.selectedGoal) return;
+
+  const goal = goalstore.selectedGoal;
+
+
+  function checkRequestSent(userId: number, goalId: number) {
+    return partnershipRequestStore.pendingRequests.find((req) => (req.user === userId && req.goal === goalId));
+  }
+
+
   const duration = getDuration(goal?.startDate, goal?.endDate);
   const currentDays = getDuration(goal?.startDate, new Date().toISOString());
 
   const [actionConfirm, setActionConfirm] = useState<ActionType>("none");
+
+  const [isSearching, setIsSearching] = useState(false);
+  const [searchResults, setSearchResults] = useState([]);
+
+  const handlePartnerSearch = debounce(async (searchTerm: string) => {
+
+    try {
+      setIsSearching(true);
+      const result = await API.users.search.username(searchTerm);
+      setSearchResults(result);
+
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsSearching(false);
+    }
+
+  }, 1000);
+
+
+  const handlePartnershipRequest = async (userId: number) => {
+    try {
+      if (!goal.id) return;
+      await partnershipRequestStore.makeRequest(goal.id, userId);
+    } catch (error) {
+
+      console.error(error);
+    }
+
+  }
+
 
   const handleDelete = () => {
     onBackClick();
@@ -83,7 +128,62 @@ const GoalDetails = observer(({ goal, onBackClick }: GoalDetailsProps) => {
           <label>{moment(goal.startDate).format("D/M/Y")}</label>
           <label>{moment(goal.endDate).format("D/M/Y")}</label>
         </div>
+        <button className="btn btn-primary w-full btn-sm my-3">
+          Start Project
+        </button>
       </div>
+
+
+      <div className="collapse collapse-arrow">
+        <input type="radio" name="my-accordion-2" />
+        <div className="flex justify-start gap-3 collapse-title text-sm font-bold">
+          <label>
+            Accountability Partners
+          </label>
+          <UserGroupIcon className="h-5" />
+        </div>
+        <div className="collapse-content">
+          <BaseInput
+            onChange={(value) => {
+              handlePartnerSearch(value);
+            }}
+            label="Partner"
+            placeholder="Search a partner..." />
+          {
+            isSearching ? (
+              <span className="loading loading-ring loading-md"></span>
+            ) : (
+              <ul className="ul bg-gm-100 px-3 py-1 bg-opacity-75 rounded">
+                {
+                  searchResults.map((user: IUser) => {
+                    const sent = checkRequestSent(user.id, goal.id);
+
+                    return (
+
+                      <li key={user.id} className="flex items-center justify-between my-2">
+                        <p>{user.username}</p>
+                        <div>
+                          <button
+                            disabled={sent}
+                            className="btn btn-sm"
+                            onClick={() => handlePartnershipRequest(user.id)}
+                          >
+                            {
+                              sent ? "Pending..." : "Request"
+                            }
+                          </button>
+                        </div>
+                      </li>
+                    )
+                  }
+                  )
+                }
+              </ul>
+            )
+          }
+        </div>
+      </div>
+
     </div >
   )
 }
