@@ -109,7 +109,7 @@ export const GoalStore = types.model("GoalStore", {
         Toaster.success("Goal deleted with success");
       },
 
-      selectGoal(goal: IGoal) {
+      selectGoal(goal?: IGoal) {
         self.selectedGoal = goal;
       },
 
